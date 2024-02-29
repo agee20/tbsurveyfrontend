@@ -1,0 +1,67 @@
+/* Font Families */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+/* Primary Color */
+:root {
+  --primary-color: #041E42;
+  --secondary-color: #A89968;
+}
+
+/* Global Styles */
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #000; /* Default color for user input */
+  background-color: #f8f9fa; /* Bootstrap default background color */
+}
+
+h1 {
+    color: var(--primary-color);
+}
+h2 {
+    color: var(--primary-color);
+}
+
+
+/* Navbar */
+.logo {
+  width: 150px; /* Adjust size as needed */
+  margin-right: 10px;
+}
+
+nav {
+    padding: 10px;
+}
+#nav-text {
+    color: var(--primary-color);
+}
+
+
+
+.form-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 50%;
+}
+
+/* Login Form */
+.login-form {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2 {
+  color: var(--primary-color);
+}
+
+.login-form .form-control {
+  margin-bottom: 15px;
+}
+
+.button-blue {
+  background-color: var(--primary-color);
+  border: none;
+}
