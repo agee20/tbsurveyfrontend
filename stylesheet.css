@@ -27,16 +27,20 @@ h2 {
   width: 150px; /* Adjust size as needed */
   margin-right: 10px;
 }
-
-nav {
-    padding: 10px;
+.nav-margin {
+  margin-top: 25px;
+}
+.nav-flex {
+  display: flex; 
+  align-items: center;
 }
 #nav-text {
     color: var(--primary-color);
+    font-size: 30px;
+    text-decoration: none;
 }
 
-
-
+/* Login Form */
 .form-container {
     display: flex;
     align-items: center;
@@ -45,9 +49,8 @@ nav {
     width: 50%;
 }
 
-/* Login Form */
 .login-form {
-  padding: 20px;
+  padding:50px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
