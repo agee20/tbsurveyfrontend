@@ -17,4 +17,9 @@ document.addEventListener("DOMContentLoaded", function() {
         var userId = 99;
         window.location.href = "./survey.html?" + "userid=" + userId + "&firstname=" + firstName + "&lastname=" + lastName;
       });
+
+
+      //add code to try to connect to DB here
+
+
 });
