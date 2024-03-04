@@ -41,7 +41,7 @@ h2 {
 }
 
 /* Login Form */
-.form-container {
+.login-form-container {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -67,4 +67,26 @@ h2 {
 .button-blue {
   background-color: var(--primary-color);
   border: none;
+  text-decoration: none;
+}
+
+/* Survey */
+.survey-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 25px;
+}
+.survey-form {
+  padding:50px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+/* Custom CSS for only larger screens */
+@media (min-width: 768px) {
+  .survey-form {
+    width: 50%;
+  }
 }
