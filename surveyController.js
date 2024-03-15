@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var firstNameInput = document.getElementById('question1').value = firstName;
     var lastNameInput = document.getElementById('question2').value = lastName;
 
-    //setup listener for the form submisstion
+    //setup listener for the form submission
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
         event.preventDefault();
 
@@ -184,3 +184,12 @@ var questionsSimulation = [
         Question: 'Have you ever provided care to Tuberculosis patients as a volunteer or healthcare worker? Select YES or NO.'
     },
 ];
+
+/* Database Connection Utility Functions */
+
+const connectionParams = {
+    user: "ADMIN",
+    password: "Password1234",
+    connectString: "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g56584dbca20ce4_tbsurveydbcloud_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))"
+};
+
