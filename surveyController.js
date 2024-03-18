@@ -6,13 +6,33 @@ document.addEventListener("DOMContentLoaded", function() {
     var lastName = urlParams.get('lastname');
 
     //add code to to call the DB and get questions 
-    
-    //programatically generate the survey
-    generateFormQuestions(questionsSimulation);
+    const getQuestionsQuery = 'SELECT * FROM SURVEYQUESTION ORDER BY SURVEYQUESTIONID';
+    executeSQL(getQuestionsQuery)
+    .then(
+        rows => {
+            var questions = rows;
+            console.log(questions);
 
-    // autofill firstname and lastname
-    var firstNameInput = document.getElementById('question1').value = firstName;
-    var lastNameInput = document.getElementById('question2').value = lastName;
+            //programatically generate the survey
+            generateFormQuestions(questions);
+
+            // autofill firstname and lastname 
+            // TABLING THIS FOR NOW, spent too much time on it and it is an insignificant feature so we can come back to this
+            /* questions.forEach(question => {
+                const input = document.querySelector(`#generatedDiv input[name="question${question.surveyquestionid}"]`);
+                if (input) {
+                    if (question.surveyquestionid === 1) {
+                        input.value = firstName;
+                    } else if (question.surveyquestionid === 2) {
+                        input.value = lastName;
+                    }
+                }
+            }); */
+    })
+    .catch(error => console.error('Error:', error));
+
+
+
 
     //setup listener for the form submission
     document.getElementById("surveyForm").addEventListener("submit", function(event) {
@@ -35,56 +55,47 @@ function generateFormQuestions(questions) {
     var generatedDiv = document.getElementById('generatedDiv');
 
     // Loop through each question object in the array
-    questions.forEach(function(question) {
-        //Insert survey questions list
-        if(question.SurveyQuestionID === 6)
-        {
-            var para = document.createElement('p');
-            para.innerHTML = "insert countries list here";
-            generatedDiv.appendChild(para);
-            //TODO: Add countries list programatically
-        }
-
+    questions.forEach(function(questionObj) {
         // Div
         var questionDiv = document.createElement('div');
         questionDiv.classList.add('form-group');
 
         // Label
         var label = document.createElement('label');
-        label.setAttribute('for', 'question' + question.SurveyQuestionID);
-        label.textContent = question.Question;
+        label.setAttribute('for', 'question' + questionObj.surveyquestionid);
+        label.textContent = questionObj.question;
         questionDiv.appendChild(label);
 
         // Input
         var input;
-        if (question.QuestionType === 'text' || question.QuestionType === 'number') {
+        if (questionObj.questiontype === 'Text' || questionObj.questiontype === 'Number') {
             input = document.createElement('input');
-            input.setAttribute('type', question.QuestionType);
-            input.setAttribute('id', 'question' + question.SurveyQuestionID);
+            input.setAttribute('type', questionObj.questiontype.toLowerCase());
+            input.setAttribute('id', 'question' + questionObj.surveyquestionid);
             input.classList.add('form-control');
             input.setAttribute('required', true);
-        } else if (question.QuestionType === 'yn') {
+        } else if (questionObj.questiontype === 'Yes/No') {
             // Create radio buttons for yes/no options
             var radioYes = document.createElement('input');
             radioYes.setAttribute('type', 'radio');
-            radioYes.setAttribute('id', 'question' + question.SurveyQuestionID + '_yes');
-            radioYes.setAttribute('name', 'question' + question.SurveyQuestionID);
+            radioYes.setAttribute('id', 'question' + questionObj.surveyquestionid + '_yes');
+            radioYes.setAttribute('name', 'question' + questionObj.surveyquestionid);
             radioYes.setAttribute('value', 'yes');
             radioYes.setAttribute('required', true);
 
             var labelYes = document.createElement('label');
-            labelYes.setAttribute('for', 'question' + question.SurveyQuestionID + '_yes');
+            labelYes.setAttribute('for', 'question' + questionObj.surveyquestionid + '_yes');
             labelYes.textContent = 'Yes';
 
             var radioNo = document.createElement('input');
             radioNo.setAttribute('type', 'radio');
-            radioNo.setAttribute('id', 'question' + question.SurveyQuestionID + '_no');
-            radioNo.setAttribute('name', 'question' + question.SurveyQuestionID);
+            radioNo.setAttribute('id', 'question' + questionObj.surveyquestionid + '_no');
+            radioNo.setAttribute('name', 'question' + questionObj.surveyquestionid);
             radioNo.setAttribute('value', 'no');
             radioNo.setAttribute('required', true);
 
             var labelNo = document.createElement('label');
-            labelNo.setAttribute('for', 'question' + question.SurveyQuestionID + '_no');
+            labelNo.setAttribute('for', 'question' + questionObj.surveyquestionid + '_no');
             labelNo.textContent = 'No';
 
             // Append radio buttons and labels to the question div
@@ -137,59 +148,38 @@ function getFormResponses() {
     return responses;
 }
 
-var questionsSimulation = [
-    {
-        SurveyQuestionID: 1,
-        QuestionType: 'text',
-        Question: 'What is your first name?'
-    },
-    {
-        SurveyQuestionID: 2,
-        QuestionType: 'text',
-        Question: 'What is your last name?'
-    },
-    {
-        SurveyQuestionID: 3,
-        QuestionType: 'number',
-        Question: 'What is your 7-digit University of Akron student ID number?'
-    },
-    {
-        SurveyQuestionID: 4,
-        QuestionType: 'text',
-        Question: 'What country were you born in?'
-    },
-    {
-        SurveyQuestionID: 5,
-        QuestionType: 'yn',
-        Question: 'Have you ever had close contact with a person/people who have Active TB or are suspected of having active TB? Select YES or NO.'
-    },
-    {
-        SurveyQuestionID: 6,
-        QuestionType: 'yn',
-        Question: 'Were you born in one of the countries or territories listed above? Select YES or NO.'
-    },
-    {
-        SurveyQuestionID: 7,
-        QuestionType: 'yn',
-        Question: 'Have you had frequent or prolonged visits (such as vacation, study, or work) to one or more of the countries or territories listed above? Select YES or NO.'
-    },
-    {
-        SurveyQuestionID: 8,
-        QuestionType: 'yn',
-        Question: 'Have you ever lived, volunteered, or worked in: a jail, a long-term care facility, or a homeless shelter? Select YES or NO.'
-    },
-    {
-        SurveyQuestionID: 9,
-        QuestionType: 'yn',
-        Question: 'Have you ever provided care to Tuberculosis patients as a volunteer or healthcare worker? Select YES or NO.'
-    },
-];
+
 
 /* Database Connection Utility Functions */
 
-const connectionParams = {
-    user: "ADMIN",
-    password: "Password1234",
-    connectString: "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g56584dbca20ce4_tbsurveydbcloud_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))"
-};
+function executeSQL(query) {
+    return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data)) {
+                return data.map(row => {
+                    const rowData = {};
+                    Object.keys(row).forEach(key => {
+                        // Convert column names to camelCase (or use as is)
+                        const camelCaseKey = key.toLowerCase();
+                        rowData[camelCaseKey] = row[key];
+                    });
+                    return rowData;
+                });
+            } else {
+                throw new Error('Invalid data format or missing rows');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            throw error; // Re-throw the error to propagate it to the caller
+        });
+}
+
+
 

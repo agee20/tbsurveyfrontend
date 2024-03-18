@@ -23,3 +23,33 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 });
+
+
+function executeSQL(query) {
+  return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (Array.isArray(data)) {
+              return data.map(row => {
+                  const rowData = {};
+                  Object.keys(row).forEach(key => {
+                      // Convert column names to camelCase (or use as is)
+                      const camelCaseKey = key.toLowerCase();
+                      rowData[camelCaseKey] = row[key];
+                  });
+                  return rowData;
+              });
+          } else {
+              throw new Error('Invalid data format or missing rows');
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          throw error; // Re-throw the error to propagate it to the caller
+      });
+}
