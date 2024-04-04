@@ -4,33 +4,68 @@ document.addEventListener("DOMContentLoaded", function() {
     var userId = urlParams.get('userid');
     var firstName = urlParams.get('firstname');
     var lastName = urlParams.get('lastname');
+    
+    var ineligibleContainer = document.getElementById("ineligible-message-container"); 
+    var surveyContainer = document.getElementById("survey-container"); 
+    surveyContainer.style.display = 'none';
+    ineligibleContainer.style.display = 'none';
+    //surveyContainer.style.display = 'flex';
 
-    //add code to to call the DB and get questions 
-    const getQuestionsQuery = 'SELECT * FROM SURVEYQUESTION ORDER BY SURVEYQUESTIONID';
-    executeSQL(getQuestionsQuery)
+    
+    //check if surveyeligible
+    const checkEligibilityQuery = "SELECT issurveyeligible from users where userid = " + userId;
+    executeSQL(checkEligibilityQuery)
     .then(
         rows => {
-            var questions = rows;
-            console.log(questions);
-
-            //programatically generate the survey
-            generateFormQuestions(questions);
-
-            // autofill firstname and lastname 
-            // TABLING THIS FOR NOW, spent too much time on it and it is an insignificant feature so we can come back to this
-            /* questions.forEach(question => {
-                const input = document.querySelector(`#generatedDiv input[name="question${question.surveyquestionid}"]`);
-                if (input) {
-                    if (question.surveyquestionid === 1) {
-                        input.value = firstName;
-                    } else if (question.surveyquestionid === 2) {
-                        input.value = lastName;
+            var isSurveyEligible = rows[0].issurveyeligible;
+            console.log("Eligible: " + isSurveyEligible)
+            if(isSurveyEligible == 0) 
+            {
+                ineligibleContainer.style.display = 'flex';
+            }
+            else
+            {
+                const checkIfSurveyRecordExists = "select studentsurveyid, userid, hastakensurvey from studentsurvey where userid = " + userId;
+                executeSQL(checkIfSurveyRecordExists)
+                .then(rows => {
+                    console.log(rows);
+                    
+                    //No survey record
+                    if (rows.length === 0) {
+                        //create new survey record
+                        console.log("No record exists, creating one...");
+                        var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDateTime, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
+                        //TODO: Troubleshoot why the insert won't actually work on the database 
+                        executeSQL(createRecordQuery)
+                        .then(
+                            rows => {
+                                console.log(rows);
+                                console.log("Record created successfully");
+                                displaySurveyQuestions(firstName, lastName);
+                        })
+                        .catch(error => console.error('Error:', error));
+                    } 
+                    //Existing survey record
+                    else 
+                    {
+                        //check if survey has been completed
+                        if(rows[0].hastakensurvey == 0)
+                        {
+                            console.log("Getting to 53");
+                            displaySurveyQuestions(firstName, lastName);
+                            surveyContainer.style.display = 'flex';
+                        }
+                        else
+                        {
+                            //bring them to the results screen
+                        }
                     }
-                }
-            }); */
+                })
+                .catch(error => console.error('Error:', error));
+
+            }
     })
     .catch(error => console.error('Error:', error));
-
 
 
 
@@ -48,6 +83,37 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
+function displaySurveyQuestions(firstName, lastName) {
+    //add code to to call the DB and get questions 
+    document.getElementById("survey-header").innerText = "Tuberculosis Survey for " + firstName + " " + lastName;
+    const getQuestionsQuery = 'SELECT * FROM SURVEYQUESTION ORDER BY SURVEYQUESTIONID';
+    executeSQL(getQuestionsQuery)
+    .then(
+        rows => {
+            var questions = rows;
+            console.log(questions);
+
+            //programatically generate the survey
+            generateFormQuestions(questions);
+            
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function createSurveyRecord(userId) {
+    var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDateTime, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
+    console.log("Creating survey record:", createRecordQuery); // Log the SQL query being executed
+    
+    return executeSQL(createRecordQuery)
+        .then(rows => {
+            console.log("Execution result:", rows); // Log the result returned by executeSQL
+            console.log("Successfully created record.");
+        })
+        .catch(error => {
+            console.error('Error creating survey record:', error);
+            throw error; // Re-throw the error to propagate it to the caller
+        });
+}
 
 
 function generateFormQuestions(questions) {
@@ -153,6 +219,7 @@ function getFormResponses() {
 /* Database Connection Utility Functions */
 
 function executeSQL(query) {
+    console.log("Executing SQL query:", query); // Log the SQL query being executed
     return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
         .then(response => {
             if (!response.ok) {
@@ -161,6 +228,7 @@ function executeSQL(query) {
             return response.json();
         })
         .then(data => {
+            console.log("SQL query execution result:", data); // Log the result of the SQL query execution
             if (Array.isArray(data)) {
                 return data.map(row => {
                     const rowData = {};
@@ -175,11 +243,17 @@ function executeSQL(query) {
                 throw new Error('Invalid data format or missing rows');
             }
         })
+        .then(result => {
+            console.log("SQL query execution success:", result); // Log the success of SQL query execution
+            return result;
+        })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error executing SQL query:', error); // Log any errors that occur during SQL query execution
             throw error; // Re-throw the error to propagate it to the caller
         });
 }
+
+
 
 
 

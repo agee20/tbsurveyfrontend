@@ -1,21 +1,59 @@
 document.addEventListener("DOMContentLoaded", function() {
+    var errorMessageParagraph = document.getElementById("error-text");
     document.getElementById("loginForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        var username = document.getElementById("username").value;
+        var email = document.getElementById("email").value;
         var password = document.getElementById("password").value;
+
+        errorMessageParagraph.innerText = "";
         //check login credentials
+        const usernameQuery = "SELECT userid FROM users WHERE email = '" + email + "'";
+        console.log(usernameQuery);
+        executeSQL(usernameQuery)
+        .then(
+            rows => {
+                console.log(rows);
 
-        //check if admin
+                if (rows.length === 0) {
+                    console.log("No user found with the specified email.");
+                    errorMessageParagraph.innerText = "Invalid email address.";
+                } else {
+                    const userId = rows[0].userid;
+                    const passwordQuery = "select userid, isadmin, firstname, lastname from users where email = '" + email + "' AND password = '" + password + "'";
+                    console.log(passwordQuery);
+                    executeSQL(passwordQuery)
+                    .then(rows => {
+                        console.log(rows);
+                        
+                        if (rows.length === 0) {
+                            console.log("No user found with the specified email + password combo.");
+                            errorMessageParagraph.innerText = "Incorrect password.";
+                        } else {
+                            //correct user and password
+                            var isAdmin = parseInt(rows[0].isadmin);
+                            console.log(isAdmin);
+                            if(isAdmin == 0)
+                            {
+                                console.log("here");
+                                //student logic + navigation
+                                var firstName = rows[0].firstname; 
+                                var lastName = rows[0].lastname;
+                                var userId = rows[0].userid;
+                                window.location.href = "./survey.html?" + "userid=" + userId + "&firstname=" + firstName + "&lastname=" + lastName;
+                            }
+                            else
+                            {
+                                //admin logic + navigation
+                                console.log("admin");
+                            }
+;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
 
-        //check if surveyeligible
-
-        //check if survey has been completed
-
-        //else
-        var firstName = "Alex"; 
-        var lastName = "Gee";
-        var userId = 99;
-        window.location.href = "./survey.html?" + "userid=" + userId + "&firstname=" + firstName + "&lastname=" + lastName;
+                }
+        })
+        .catch(error => console.error('Error:', error));
       });
 
 

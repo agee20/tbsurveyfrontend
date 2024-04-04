@@ -4,6 +4,8 @@ In order to run the server and get the application to run follow the following s
 
 1. Prerequisites 
 - Make sure you have Node.js installed on your machine 
+- Install Node-oracledb
+- Install Express
 
 2. Running the Server
 - Open up a terminal instance (Top of the screen -> Terminal -> New Terminal)
@@ -15,7 +17,7 @@ In order to run the server and get the application to run follow the following s
 - Call the method executeSQL(query) and pass in a SQL query
 - This will return a response. To handle the response use this code: 
 
-executeSQL(getQuestionsQuery)
+executeSQL(QUERY)
     .then(
         rows => {
             console.log(rows);
