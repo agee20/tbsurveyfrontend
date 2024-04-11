@@ -1,5 +1,5 @@
 const oracledb = require('oracledb');
-const brevo = require('brevo'); // Assuming Brevo is the correct library name
+const brevo = require('brevo');
 const cron = require('node-cron');
 
 // Oracle ATP connection details
@@ -57,7 +57,7 @@ async function sendEmails() {
   }
 }
 
-// Schedule daily batch job
+// Schedule daily batch job 6:30PM
 cron.schedule('30 18 * * *', () => {
   console.log('Running batch job...');
   sendEmails();
