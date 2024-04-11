@@ -2,25 +2,27 @@ const oracledb = require('oracledb');
 const brevo = require('brevo');
 const cron = require('node-cron');
 
-// Oracle ATP connection details
-const dbConfig = {
-  user: 'ADMIN',
-  password: 'Password1234',
-  connectString: '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g56584dbca20ce4_tbsurveydbcloud_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
-};
-
 // Brevo configuration
 const brevoConfig = {
   apiKey: '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',
 };
 
 // SQL query to fetch eligible users and their email templates
-const query = `
+const QUERY = `
   SELECT u.UserID, u.Email, e.EmailSubject, e.EmailBodyHTML
   FROM Users u
   JOIN EmailTemplate e ON u.EmailType = e.EmailType
   WHERE u.IsSurveyEligible = 1;
 `;
+
+executeSQL(QUERY)
+    .then(
+        rows => {
+            console.log(rows);
+            
+            //Add additional post-query logic here if necessary
+    })
+    .catch(error => console.error('Error:', error));
 
 // Function to send emails
 async function sendEmails() {
@@ -46,7 +48,7 @@ async function sendEmails() {
         recipients: {listIds: [userId]}, // Assuming listIds represents user IDs
       };
 
-      // Send email campaign using Brevo
+      // Send email using Brevo
       await brevo.createEmail(emailContent, brevoConfig);
     }
 
