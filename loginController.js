@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             }
                             else
                             {
-                                //admin logic + navigation
+                                //TODO: admin logic + navigation
                                 console.log("admin");
                             }
 ;

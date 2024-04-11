@@ -64,3 +64,34 @@ cron.schedule('30 18 * * *', () => {
   console.log('Running batch job...');
   sendEmails();
 });
+
+
+function executeSQL(query) {
+  console.log("Executing SQL query:", query); // Log the SQL query being executed
+  return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (Array.isArray(data)) {
+              return data.map(row => {
+                  const rowData = {};
+                  Object.keys(row).forEach(key => {
+                      // Convert column names to camelCase (or use as is)
+                      const camelCaseKey = key.toLowerCase();
+                      rowData[camelCaseKey] = row[key];
+                  });
+                  return rowData;
+              });
+          } else {
+              throw new Error('Invalid data format or missing rows');
+          }
+      })
+      .catch(error => {
+          console.error('Error executing SQL query:', error); // Log any errors that occur during SQL query execution
+          throw error; // Re-throw the error to propagate it to the caller
+      });
+}
