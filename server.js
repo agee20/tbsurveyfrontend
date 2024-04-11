@@ -33,7 +33,7 @@ app.get('/executeQuery', async (req, res) => {
         if (result.rowsAffected !== undefined) {
             console.log('No rows returned (INSERT statement)');
             // If it's an INSERT statement, commit the transaction
-            await connection.commit();
+            connection.commit();
             console.log('Transaction committed successfully');
         }
 

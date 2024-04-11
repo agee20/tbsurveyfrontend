@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Get the element containing the thank you message
 const thankYouElement = document.querySelector('.thank-you');
 
@@ -36,3 +37,9 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.href = 'index.html';
     });
 });
+=======
+console.log('hello')
+
+//check for survey result
+//test
+>>>>>>> 8ac0edfd0f075fa23c7e87be3ab963863ca4e5b1

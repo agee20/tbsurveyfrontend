@@ -35,13 +35,13 @@ document.addEventListener("DOMContentLoaded", function() {
                         //create new survey record
                         console.log("No record exists, creating one...");
                         var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDateTime, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
-                        //TODO: Troubleshoot why the insert won't actually work on the database 
                         executeSQL(createRecordQuery)
                         .then(
                             rows => {
                                 console.log(rows);
                                 console.log("Record created successfully");
                                 displaySurveyQuestions(firstName, lastName);
+                                surveyContainer.style.display = 'flex';
                         })
                         .catch(error => console.error('Error:', error));
                     } 
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                         else
                         {
-                            //bring them to the results screen
+                            //TODO: bring them to the results screen
                         }
                     }
                 })
@@ -75,8 +75,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
         var responses = getFormResponses();
         console.log(responses);
-        //TODO: calculate results + update database
+        
+        //get studentsurveyid
+        var getSurveyIdQuery = "SELECT StudentSurveyId FROM StudentSurvey WHERE UserID = " + userId;
+        executeSQL(getSurveyIdQuery)
+        .then(
+            rows => {
+                console.log(rows);
+                var studentsurveyid = rows[0].studentsurveyid;
+                //loop through each question and update SurveyQuestionResponses table 
+                //and calculate results
+                var result = "negative";
+                responses.forEach(response => {
+                    if(response.Response.toLowerCase() === "yes")
+                    {
+                        result = "positive";
+                    }
+                    var addQuestionResultQuery = "INSERT INTO SurveyQuestionResponses (StudentSurveyId, SurveyQuestionId, Response) VALUES (" + studentsurveyid + ", " + response.SurveyQuestionID + ", '" + response.Response + "')";
+                    executeSQL(addQuestionResultQuery)
+                    .then(
+                        rows => {
+                            console.log(rows);
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+                console.log("SURVEY RESULT: " + result);
 
+                //TODO: update StudentSurvey, set HasTakenSurvey to 1, SurveyCompletionDateTime to Now, and Result to "positive" or "negative"
+        })
+        .catch(error => console.error('Error:', error));
+        
         //window.location.href = "./file";
       });
 
@@ -93,35 +121,53 @@ function displaySurveyQuestions(firstName, lastName) {
             var questions = rows;
             console.log(questions);
 
-            //programatically generate the survey
-            generateFormQuestions(questions);
-            
+            const highRiskCountriesQuery = "SELECT * FROM HIGHRISKCOUNTRIES";
+            executeSQL(highRiskCountriesQuery)
+            .then(
+                rows => {
+                    console.log(rows);
+                    var countries = rows;
+
+                    //programatically generate the survey
+                    generateFormQuestions(questions, countries);
+
+            })
+            .catch(error => console.error('Error:', error));
     })
     .catch(error => console.error('Error:', error));
 }
 
-function createSurveyRecord(userId) {
-    var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDateTime, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
-    console.log("Creating survey record:", createRecordQuery); // Log the SQL query being executed
-    
-    return executeSQL(createRecordQuery)
-        .then(rows => {
-            console.log("Execution result:", rows); // Log the result returned by executeSQL
-            console.log("Successfully created record.");
-        })
-        .catch(error => {
-            console.error('Error creating survey record:', error);
-            throw error; // Re-throw the error to propagate it to the caller
-        });
-}
-
-
-function generateFormQuestions(questions) {
+function generateFormQuestions(questions, countries) {
+    console.log("Calling generate form questions function");
     // Get the div where questions will be generated
     var generatedDiv = document.getElementById('generatedDiv');
 
     // Loop through each question object in the array
     questions.forEach(function(questionObj) {
+
+        //Insert high risk countries list before question 6 
+        if (questionObj.surveyquestionid === 6) {
+
+            var countriesLabel = document.createElement('h3');
+            countriesLabel.classList.add('countries-label');
+            countriesLabel.textContent = 'High-Risk Countries List';
+            generatedDiv.appendChild(countriesLabel);
+            
+            var countriesList = document.createElement('div');
+            
+            countriesList.classList.add('countries-list');
+
+            // Iterate over countries and create list items
+            countries.forEach(country => {
+                var countryItem = document.createElement('div');
+                countryItem.innerText = country.countryname; // Use innerText
+                countriesList.appendChild(countryItem);
+            });
+
+            // Add the countries list to the paragraph
+            generatedDiv.appendChild(countriesList);
+        }
+
         // Div
         var questionDiv = document.createElement('div');
         questionDiv.classList.add('form-group');
@@ -131,6 +177,7 @@ function generateFormQuestions(questions) {
         label.setAttribute('for', 'question' + questionObj.surveyquestionid);
         label.textContent = questionObj.question;
         questionDiv.appendChild(label);
+
 
         // Input
         var input;
@@ -165,6 +212,7 @@ function generateFormQuestions(questions) {
             labelNo.textContent = 'No';
 
             // Append radio buttons and labels to the question div
+            questionDiv.appendChild(document.createElement('br'));
             questionDiv.appendChild(radioYes);
             questionDiv.appendChild(labelYes);
             questionDiv.appendChild(document.createElement('br'));
@@ -228,7 +276,6 @@ function executeSQL(query) {
             return response.json();
         })
         .then(data => {
-            console.log("SQL query execution result:", data); // Log the result of the SQL query execution
             if (Array.isArray(data)) {
                 return data.map(row => {
                     const rowData = {};
@@ -243,15 +290,12 @@ function executeSQL(query) {
                 throw new Error('Invalid data format or missing rows');
             }
         })
-        .then(result => {
-            console.log("SQL query execution success:", result); // Log the success of SQL query execution
-            return result;
-        })
         .catch(error => {
             console.error('Error executing SQL query:', error); // Log any errors that occur during SQL query execution
             throw error; // Re-throw the error to propagate it to the caller
         });
 }
+
 
 
 
