@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             if(isAdmin == 0)
                             {
                                 console.log("here");
-                                //student logic + navigation
+                                //student logic + navigations
                                 var firstName = rows[0].firstname; 
                                 var lastName = rows[0].lastname;
                                 var userId = rows[0].userid;
