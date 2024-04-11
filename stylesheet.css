@@ -91,7 +91,7 @@ h2 {
 .ineligible-text
 {
   text-align: center;
-  font-size: 28px;
+  font-size: 18px;
   margin-top: 35px;
 }
 /* Custom CSS for only larger screens */
@@ -99,4 +99,13 @@ h2 {
   .survey-form {
     width: 50%;
   }
+}
+
+/*Results page */
+
+.thank-you {
+  text-align: center; 
+  margin-top: 10%;
+  padding: 150px;
+  font-size: 17px; 
 }
