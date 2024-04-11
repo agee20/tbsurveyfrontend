@@ -58,7 +58,7 @@ async function sendEmails() {
 }
 
 // Schedule daily batch job
-cron.schedule('0 0 * * *', () => {
+cron.schedule('30 18 * * *', () => {
   console.log('Running batch job...');
   sendEmails();
 });
