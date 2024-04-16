@@ -1,6 +1,7 @@
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors'); // Import the cors package
+require('./emailtest.js'); //Runs file for Brevo at the same time
 
 const app = express();
 const PORT = 3000;
@@ -66,10 +67,6 @@ app.get('/executeQuery', async (req, res) => {
         res.status(500).send('Error executing SQL query');
     }
 });
-
-
-
-
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
