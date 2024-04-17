@@ -17,18 +17,29 @@ window.addEventListener('resize', centerThankYou);
 // Call the centerThankYou function initially to center on page load
 centerThankYou();
 
-
+const urlParams = new URLSearchParams(window.location.search);
+var userId = urlParams.get('userid');
 // Update result message based on survey result
 const resultMessageElement = document.getElementById('result-message');
-const surveyResult = ''; // replace this with the actual survey result
 
-if (surveyResult === 'positive') {
-  resultMessageElement.innerHTML = '<p>Your TB screening result is <span style="color: red;">positive</span>.</p>';
-} else if (surveyResult === 'negative') {
-  resultMessageElement.innerHTML = '<p>Your TB screening result is <span style="color: green;">negative</span>.</p>';
-} else {
-  resultMessageElement.innerHTML = '<p>Your TB screening result is pending. Check your email for further instructions.</p>';
-}
+var surveyResultQuery = "SELECT Result from StudentSurvey WHERE UserId = " +  userId; 
+executeSQL(surveyResultQuery)
+    .then(
+        rows => {
+            console.log(rows);
+            const surveyResult = rows[0].result;
+
+            if (surveyResult === 'positive') {
+              resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: red;">positive</span>. You need to take a TB test.</h2>';
+            } else if (surveyResult === 'negative') {
+              resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: green;">negative</span>. You do not need a TB test.</h2>';
+            } else {
+              resultMessageElement.innerHTML = '<h2>Your TB screening result is pending. Check your email for further instructions.</h2>';
+            }
+    })
+    .catch(error => console.error('Error:', error));
+
+
 
 document.addEventListener("DOMContentLoaded", function() {
     // Get the button element
@@ -41,5 +52,35 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-console.log('hello')
+/* Database Connection Utility Functions */
+
+function executeSQL(query) {
+  console.log("Executing SQL query:", query); // Log the SQL query being executed
+  return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (Array.isArray(data)) {
+              return data.map(row => {
+                  const rowData = {};
+                  Object.keys(row).forEach(key => {
+                      // Convert column names to camelCase (or use as is)
+                      const camelCaseKey = key.toLowerCase();
+                      rowData[camelCaseKey] = row[key];
+                  });
+                  return rowData;
+              });
+          } else {
+              throw new Error('Invalid data format or missing rows');
+          }
+      })
+      .catch(error => {
+          console.error('Error executing SQL query:', error); // Log any errors that occur during SQL query execution
+          throw error; // Re-throw the error to propagate it to the caller
+      });
+}
 

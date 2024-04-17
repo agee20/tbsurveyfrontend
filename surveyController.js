@@ -1,4 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
+    //Logout button listener
+    // Get the button element
+    const loginButton = document.querySelector('.button-blue');
+    
+    // Add event listener to the button
+    loginButton.addEventListener('click', function() {
+        // Redirect to the index page
+        window.location.href = 'index.html';
+    });
+
     //get user id and password from url string
     const urlParams = new URLSearchParams(window.location.search);
     var userId = urlParams.get('userid');
@@ -9,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function() {
     var surveyContainer = document.getElementById("survey-container"); 
     surveyContainer.style.display = 'none';
     ineligibleContainer.style.display = 'none';
-    //surveyContainer.style.display = 'flex';
 
     
     //check if surveyeligible
@@ -57,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                         else
                         {
-                            //TODO: bring them to the results screen
+                            window.location.href = "./results.html?" + "userid=" + userId;
                         }
                     }
                 })
@@ -99,13 +108,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     })
                     .catch(error => console.error('Error:', error));
                 });
-                console.log("SURVEY RESULT: " + result);
+                var currentDate = new Date();
+                var formattedDate = currentDate.toISOString().slice(0, 10);
 
-                //TODO: update StudentSurvey, set HasTakenSurvey to 1, SurveyCompletionDateTime to Now, and Result to "positive" or "negative"
+                var updateSurveyRecordQuery = "UPDATE StudentSurvey SET HasTakenSurvey = 1, SurveyCompletionDate = TO_DATE('" + formattedDate + "', 'YYYY-MM-DD'), Result = '" + result + "' WHERE UserId = " + userId;
+                executeSQL(updateSurveyRecordQuery)
+                .then(
+                    rows => {
+                        console.log(rows);
+                        window.location.href = "./results.html?" + "userid=" + userId;
+                })
+                .catch(error => console.error('Error:', error));
         })
         .catch(error => console.error('Error:', error));
         
-        //window.location.href = "./file";
       });
 
 });
