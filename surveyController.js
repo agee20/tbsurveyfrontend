@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (rows.length === 0) {
                         //create new survey record
                         console.log("No record exists, creating one...");
-                        var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDateTime, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
+                        var createRecordQuery = "INSERT INTO StudentSurvey (StudentSurveyID, UserID, HasTakenSurvey, SurveyCompletionDate, Result, NumberOfRemindersSent, LastEmailSendDate, LastEmailSendStatus) VALUES (" + userId + ", " +  userId + ", 0, NULL, NULL, 0, NULL, NULL)";
                         executeSQL(createRecordQuery)
                         .then(
                             rows => {
