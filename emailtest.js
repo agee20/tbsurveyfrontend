@@ -42,8 +42,8 @@ sendSmtpEmail.messageVersions = [{
       "greeting": "Welcome onboard!",
       "headline": "Be Ready for Takeoff."
     },
-    "subject": "+001",
-    "htmlContent": "<html><body><h1>+001 content</h1></body></html>"
+    "subject": "Test Email 1",
+    "htmlContent": "<html><body><h1>Test email content</h1></body></html>"
   },
   {
     "to": [
@@ -56,7 +56,8 @@ sendSmtpEmail.messageVersions = [{
       "greeting": "Greeting 1.",
       "headline": "Some bathing suits you might like"
     },
-    "subject": "+002"
+    "subject": "Test email 2",
+    "htmlContent": "<html><body><h1>Test email content</h1></body></html>"
 }];
 
 apiInstance.sendTransacEmail(sendSmtpEmail).then(function (data) {
