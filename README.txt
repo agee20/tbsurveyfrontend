@@ -6,6 +6,7 @@ In order to run the server and get the application to run follow the following s
 - Make sure you have Node.js installed on your machine 
 - Install Node-oracledb
 - Install Express
+- Might have to install CORS as well
 - Install @getbrevo/brevo
 
 2. Running the Server
