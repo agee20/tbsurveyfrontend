@@ -21,7 +21,7 @@ let sendSmtpEmail = new brevo.SendSmtpEmail();
 
 sendSmtpEmail.subject = "My {{params.subject}}";
 sendSmtpEmail.htmlContent = "<html><body><h1>Common: This is my first transactional email {{params.parameter}}</h1></body></html>";
-sendSmtpEmail.sender = { "name": "Blake", "email": "bwgarner2@gmail.com" };
+sendSmtpEmail.sender = { "name": "Akron Health Services", "email": "bwgarner2@gmail.com" };
 sendSmtpEmail.to = [ 
   { "email": "testtbsurvey123@gmail.com", "name": "John" }
 ];

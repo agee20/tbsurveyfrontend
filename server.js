@@ -1,7 +1,7 @@
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors'); // Import the cors package
-require('./emailtest.js'); //Runs file for Brevo at the same time (Turned off for now so it doesn't send an email each time this is started)
+//require('./email.js'); //Runs file for Brevo at the same time
 
 const app = express();
 const PORT = 3000;

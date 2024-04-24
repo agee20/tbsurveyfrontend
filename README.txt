@@ -1,6 +1,6 @@
 APP START DOCUMENTATION
 
-In order to run the server and get the application to run follow the following steps: 
+In order to run the server, email and have the application to run follow the following steps: 
 
 1. Prerequisites 
 - Make sure you have Node.js installed on your machine 
@@ -8,6 +8,7 @@ In order to run the server and get the application to run follow the following s
 - Install Express
 - Might have to install CORS as well
 - Install @getbrevo/brevo
+- Install cors
 
 2. Running the Server
 - Open up a terminal instance (Top of the screen -> Terminal -> New Terminal)
