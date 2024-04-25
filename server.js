@@ -1,7 +1,7 @@
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors'); // Import the cors package
-//require('./email.js'); //Runs file for Brevo at the same time
+const { sendEmails } = require('./email.js');
 
 const app = express();
 const PORT = 3000;
@@ -68,6 +68,12 @@ app.get('/executeQuery', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    try {
+        await sendEmails();
+        console.log('Emails sent successfully');
+      } catch (error) {
+        console.error('Error sending emails:', error);
+      }
 });
