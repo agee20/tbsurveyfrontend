@@ -1,7 +1,8 @@
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors'); // Import the cors package
-const { sendEmails } = require('./email.js');
+const { sendEmailsOld } = require('./email.js');
+const { sendEmailsNew } = require('./email.js');
 
 const app = express();
 const PORT = 3000;
@@ -71,9 +72,8 @@ app.get('/executeQuery', async (req, res) => {
 app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     try {
-        await sendEmails();
-        console.log('Emails sent successfully');
+        await sendEmailsNew();
       } catch (error) {
-        console.error('Error sending emails:', error);
+        console.error('Error calling send email function:', error);
       }
 });

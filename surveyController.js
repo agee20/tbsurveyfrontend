@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     //Logout button listener
-    // Get the button element
+    //Get the button element
     const loginButton = document.querySelector('.button-blue');
     
     // Add event listener to the button
@@ -9,15 +9,20 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.href = 'index.html';
     });
 
+    //hide survey and show spinner while queries are still loading
+    const loadingSpinner = document.getElementById("loading-container");
+    const surveyContainer = document.getElementById("survey-container");
+    //loadingSpinner.style.display = "none";
+    surveyContainer.style.display = 'none';
+
+
     //get user id and password from url string
     const urlParams = new URLSearchParams(window.location.search);
     var userId = urlParams.get('userid');
     var firstName = urlParams.get('firstname');
     var lastName = urlParams.get('lastname');
     
-    var ineligibleContainer = document.getElementById("ineligible-message-container"); 
-    var surveyContainer = document.getElementById("survey-container"); 
-    surveyContainer.style.display = 'none';
+    var ineligibleContainer = document.getElementById("ineligible-message-container");
     ineligibleContainer.style.display = 'none';
 
     
@@ -51,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 console.log("Record created successfully");
                                 displaySurveyQuestions(firstName, lastName);
                                 surveyContainer.style.display = 'flex';
+                                loadingSpinner.style.display = 'none';
                         })
                         .catch(error => console.error('Error:', error));
                     } 
@@ -63,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             console.log("Getting to 53");
                             displaySurveyQuestions(firstName, lastName);
                             surveyContainer.style.display = 'flex';
+                            loadingSpinner.style.display = 'none';
                         }
                         else
                         {

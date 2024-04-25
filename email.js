@@ -14,7 +14,187 @@ apiKey.apiKey = 'xkeysib-bb7e25f192cf8f85e6a52606b1923cc6d8674060f02daba764b7d39
 
 let apiInstance = new brevo.TransactionalEmailsApi();
 
-async function sendEmails() {
+async function sendEmailsNew() { 
+  const getusersquery = `
+      SELECT users.UserID, users.FirstName, users.LastName, users.Email, studentsurvey.numberofreminderssent, studentsurvey.hastakensurvey, studentsurvey.lastemailsenddate, studentsurvey.lastemailsendstatus, studentsurvey.surveycompletiondate, studentsurvey.result
+      FROM users
+      INNER JOIN studentsurvey ON users.userID = studentsurvey.userID
+  `;
+  executeSQL(getusersquery)
+  .then(rows => {
+      console.log(rows);
+
+      const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+      rows.forEach(row => {
+        let sendSmtpEmail = new brevo.SendSmtpEmail();
+
+        if (row.hastakensurvey === 0) {
+          if (row.numberofreminderssent === 0) {
+            sendInitialReminderEmail(sendSmtpEmail, row);
+          } else if (row.numberofreminderssent >= 1 && row.numberofreminderssent <= 8) {
+            sendReminderEmail(sendSmtpEmail, row);
+          } else if (row.numberofreminderssent === 9) {
+            sendFinalReminderEmail(sendSmtpEmail, row);
+          }
+        } else if (row.hastakensurvey === 1 && row.lastemailsenddate <= row.surveycompletiondate) {
+          sendResultEmail(sendSmtpEmail, row);
+        }
+      });
+
+      //Here are the Smtp objects that are being compiled. Seems to be a bug with the logic that is causing objects to only 
+  })
+  .catch(error => console.error('Error:', error));
+
+}
+
+function sendEmail(sendSmtpEmail) {
+  console.log("54");
+  console.log(sendSmtpEmail);
+}
+
+function sendInitialReminderEmail(sendSmtpEmail, row) {
+  sendSmtpEmail.subject = "TB Testing Survey";
+  sendSmtpEmail.htmlContent = generateInitialReminderContent(row);
+  setCommonEmailProperties(sendSmtpEmail, row);
+  sendEmail(sendSmtpEmail);
+}
+
+function sendReminderEmail(sendSmtpEmail, row) {
+  sendSmtpEmail.subject = "TB Testing Survey Reminder";
+  sendSmtpEmail.htmlContent = generateReminderContent(row);
+  setCommonEmailProperties(sendSmtpEmail, row);
+  sendEmail(sendSmtpEmail);
+}
+
+function sendFinalReminderEmail(sendSmtpEmail, row) {
+  sendSmtpEmail.subject = "TB Testing Survey Final Reminder";
+  sendSmtpEmail.htmlContent = generateFinalReminderContent(row);
+  setCommonEmailProperties(sendSmtpEmail, row);
+  sendEmail(sendSmtpEmail);
+}
+
+function sendResultEmail(sendSmtpEmail, row) {
+  sendSmtpEmail.subject = row.result === 'positive' ? "TB Testing Survey Result: Positive" : "TB Testing Survey Result: Negative";
+  sendSmtpEmail.htmlContent = generateResultContent(row);
+  setCommonEmailProperties(sendSmtpEmail, row);
+  sendEmail(sendSmtpEmail);
+}
+
+//Functions to return the HTML content of each type of email 
+function generateInitialReminderContent(row) {
+  return `
+    <html>
+      <body>
+        <p>Dear ${row.firstname},</p>
+        <br/>
+        <p>Welcome to The University of Akron! As discussed at your orientation, the university requires
+        that all new students are screened for Tuberculosis (TB). Please complete the online screening
+        survey using this link: (insert survey link here). Please complete it by (insert due date here).</p>
+        <br/>
+        <p>If you have any questions or concerns, please contact Student Health Services at 330-972-7808
+        or <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>.</p>
+        <br/>
+        <p>Sincerely,</p>
+        <p>The University of Akron
+        <br/>
+        Student Health Services</p>
+      </body>
+    </html>`;
+}
+
+function generateReminderContent(row) {
+  return `
+    <html>
+      <body>
+        <p>Dear ${row.firstname},</p>
+        <br/>
+        <p>Our records show that you have not yet completed the Tuberculosis (TB) screening survey,
+        which is a requirement of The University of Akron for all new students. Please complete the
+        survey using this link: (insert survey link here). The due date is (insert due date here).</p>
+        <br/>
+        <p>If you have any questions or concerns, please contact Student Health Services at 330-972-7808
+        or <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>.</p>
+        <br/>
+        <p>Sincerely,</p>
+        <p>The University of Akron
+        <br/>
+        Student Health Services</p>
+      </body>
+    </html>`;
+}
+
+function generateFinalReminderContent(row) {
+  return `
+    <html>
+      <body>
+        <p>Dear ${row.firstname},</p>
+        <br/>
+        <p>Our records show that you have not completed the mandatory Tuberculosis (TB) screening survey. This is a
+        requirement for all new students at The University of Akron. The final deadline is (insert date here).</p>
+        <br/>
+        <p>Failure to complete the survey by this date will result in a medical hold on your student account. The hold
+        prevents you from registering for classes for the next semester and may cause issues with your student visa.
+        The hold will be removed after you have completed the necessary requirements.</p>
+        <br/>
+        <p>If you have any questions or concerns, please contact Student Health Services at 330-972-7808
+        or <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>.</p>
+        <br/>
+        <p>Sincerely,</p>
+        <p>The University of Akron
+        <br/>
+        Student Health Services</p>
+      </body>
+    </html>`;
+}
+
+function generateResultContent(row) {
+  if (row.result === 'positive') {
+    return `
+      <html>
+        <body>
+          <p>Dear ${row.firstname},</p>
+          <br/>
+          <p>Thank you for completing the online Tuberculosis (TB) screening survey. Based on your survey answers,
+          you do not need a TB test and have completed the university's TB screening/testing requirements.</p>
+          <br/>
+          <p>Sincerely,</p>
+          <br/>
+          <p>The University of Akron
+          <br/>
+          Student Health Services</p>
+        </body>
+      </html>`;
+  } else if (row.result === 'negative') {
+    return `
+      <html>
+        <body>
+          <p>Dear <strong>${row.firstname},</strong></p>
+          <br/>
+          <p>Thank you for completing the online Tuberculosis (TB) screening survey. <strong>Your answers indicate a need for TB testing.</strong></p>
+          <br/>
+          <p>Please make an appointment at Student Health Services by calling 330-972-7808 or emailing <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>. Please have your TB test by (insert due date here).</p>
+          <br/>
+          <p>Student Health Services is located inside the Student Recreation and Wellness Center, Suite 260. If you do not have the university's student health insurance plan, please bring your health insurance card.</p>
+          <br/>
+          <p><strong>As a friendly reminder, this is a requirement of the university.</strong> Please be aware that failure to complete the test by the due date listed above will result in a medical hold placed on your student account. The hold prevents you from registering for classes for the next semester and may cause issues with your student visa. The hold is removed after you have completed the necessary requirements.</p>
+          <br/>
+          <p>Please let us know if you have any questions.</p>
+          <br/>
+          <p>Thank you,</p>
+          <p>The University of Akron<br/>Student Health Services</p>
+        </body>
+      </html>`;
+  }
+}
+
+function setCommonEmailProperties(sendSmtpEmail, row) {
+  sendSmtpEmail.sender = { "name": "Akron Health Services", "email": "testtbsurvey123@gmail.com" };
+  sendSmtpEmail.to = [{ "email": "testtbsurvey123@gmail.com", "name": row.firstname + ' ' + row.lastname }];
+}
+
+async function sendEmailsOld() {
+  console.log("Getting to send emails");
   let connection;
   try {
     console.log('Attempting to establish database connection');
@@ -32,8 +212,12 @@ async function sendEmails() {
     
     // Iterate through the query results and send emails dynamically
     await Promise.all(result.rows.map(async (row) => {
+      console.log("row:")
+      console.log(row)
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       let sendSmtpEmail = new brevo.SendSmtpEmail();
+      //this ends up being undefined
+      console.log(row.hastakensurvey);
       if (row.hastakensurvey === 0) {
         if (row.numberofreminderssent === 0) {
           // Initial reminder email template
@@ -183,4 +367,38 @@ async function sendEmails() {
   }
 }
 
-module.exports = { sendEmails };
+module.exports = { sendEmailsOld };
+module.exports = { sendEmailsNew };
+
+
+/* Database Connection Utility Functions */
+
+function executeSQL(query) {
+  console.log("Executing SQL query:", query); // Log the SQL query being executed
+  return fetch(`http://localhost:3000/executeQuery?sql=${encodeURIComponent(query)}`)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (Array.isArray(data)) {
+              return data.map(row => {
+                  const rowData = {};
+                  Object.keys(row).forEach(key => {
+                      // Convert column names to camelCase (or use as is)
+                      const camelCaseKey = key.toLowerCase();
+                      rowData[camelCaseKey] = row[key];
+                  });
+                  return rowData;
+              });
+          } else {
+              throw new Error('Invalid data format or missing rows');
+          }
+      })
+      .catch(error => {
+          console.error('Error executing SQL query:', error); // Log any errors that occur during SQL query execution
+          throw error; // Re-throw the error to propagate it to the caller
+      });
+}

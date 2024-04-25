@@ -87,6 +87,10 @@ h2 {
   text-align: left;
   color: red;
 }
+#survey-spinner {
+  font-size: 60px !important;
+  margin-top: 25px;
+}
 .ineligible-text
 {
   text-align: center;

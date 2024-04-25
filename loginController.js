@@ -1,6 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
+    var loadingSpinner = document.getElementById("spinner");
+    var loginText = document.getElementById("login-text");
+    loadingSpinner.style.display = "none";
+
+
     var errorMessageParagraph = document.getElementById("error-text");
     document.getElementById("loginForm").addEventListener("submit", function(event) {
+        loadingSpinner.style.display = "inline-block";
+        loginText.style.display = "none";
+        
         event.preventDefault();
         var email = document.getElementById("email").value;
         var password = document.getElementById("password").value;
@@ -17,6 +25,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (rows.length === 0) {
                     console.log("No user found with the specified email.");
                     errorMessageParagraph.innerText = "Invalid email address.";
+                    loginText.style.display = "inline-block";
+                    loadingSpinner.style.display = "none";
                 } else {
                     const userId = rows[0].userid;
                     const passwordQuery = "select userid, isadmin, firstname, lastname from users where email = '" + email + "' AND password = '" + password + "'";
@@ -28,6 +38,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         if (rows.length === 0) {
                             console.log("No user found with the specified email + password combo.");
                             errorMessageParagraph.innerText = "Incorrect password.";
+                            loginText.style.display = "inline-block";
+                            loadingSpinner.style.display = "none";
                         } else {
                             //correct user and password
                             var isAdmin = parseInt(rows[0].isadmin);
@@ -43,8 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             }
                             else
                             {
-                                //TODO: admin logic + navigation
-                                console.log("admin");
+                                alert("Admin login detected. This part of the application is currently not built.")
                             }
 ;
                         }
