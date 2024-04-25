@@ -1,6 +1,7 @@
 const brevo = require('@getbrevo/brevo');
 const oracledb = require('oracledb'); // Import the oracledb package
 
+
 // Database connection configuration
 const dbConfig = {
   user: 'ADMIN',

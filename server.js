@@ -72,7 +72,7 @@ app.get('/executeQuery', async (req, res) => {
 app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     try {
-        await sendEmailsNew();
+        //await sendEmailsNew();
       } catch (error) {
         console.error('Error calling send email function:', error);
       }
