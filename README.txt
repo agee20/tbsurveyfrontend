@@ -6,6 +6,7 @@ In order to run the server, email and have the application to run follow the fol
 - Make sure you have Node.js installed on your machine 
 - Install Node-oracledb
 - Install Express
+- Might have to install CORS as well
 - Install @getbrevo/brevo
 - Install cors
 
