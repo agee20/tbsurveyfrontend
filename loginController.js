@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     loadingSpinner.style.display = "none";
                 } else {
                     const userId = rows[0].userid;
-                    const passwordQuery = "select userid, isadmin, firstname, lastname from users where email = '" + email + "' AND password = '" + password + "'";
+                    const passwordQuery = "select userid, isadmin, firstname, lastname, universityid from users where email = '" + email + "' AND password = '" + password + "'";
                     console.log(passwordQuery);
                     executeSQL(passwordQuery)
                     .then(rows => {
@@ -51,7 +51,8 @@ document.addEventListener("DOMContentLoaded", function() {
                                 var firstName = rows[0].firstname; 
                                 var lastName = rows[0].lastname;
                                 var userId = rows[0].userid;
-                                window.location.href = "./survey.html?" + "userid=" + userId + "&firstname=" + firstName + "&lastname=" + lastName;
+                                var universityid = rows[0].universityid;
+                                window.location.href = "./survey.html?" + "userid=" + userId + "&firstname=" + firstName + "&lastname=" + lastName + "&universityid=" + universityid;
                             }
                             else
                             {

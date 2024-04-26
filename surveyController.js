@@ -91,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         var responses = getFormResponses();
         console.log(responses);
-        
         //get studentsurveyid
         var getSurveyIdQuery = "SELECT StudentSurveyId FROM StudentSurvey WHERE UserID = " + userId;
         executeSQL(getSurveyIdQuery)
@@ -257,6 +256,27 @@ function getFormResponses() {
     var responses = [];
     //Credit: I asked ChatGPT to help with this line
     var inputs = document.querySelectorAll('#generatedDiv input[type="text"], #generatedDiv input[type="number"], #generatedDiv input[type="radio"]:checked');
+    const urlParams = new URLSearchParams(window.location.search);
+    var firstName = urlParams.get('firstname');
+    var lastName = urlParams.get('lastname');
+    var studentid = urlParams.get('universityid');
+    //TODO: Pass the studentid from login and use that for q3
+
+    var q1 = {
+        SurveyQuestionID: 1,
+        Response: firstName
+    };
+    var q2 = {
+        SurveyQuestionID: 2,
+        Response: lastName
+    };
+    var q3 = {
+        SurveyQuestionID: 3,
+        Response: studentid
+    };
+    responses.push(q1);
+    responses.push(q2);
+    responses.push(q3);
 
     // Loop through each input
     inputs.forEach(function(input) {
