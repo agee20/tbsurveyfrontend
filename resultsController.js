@@ -1,3 +1,12 @@
+const brevo = require('@getbrevo/brevo');
+const { sendEmailsResults } = require('./email'); // Assuming you have defined sendEmailsResults function in email.js
+
+let defaultClient = brevo.ApiClient.instance;
+let apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = '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';
+
+let apiInstance = new brevo.TransactionalEmailsApi();
+
 console.log('hello'); // Retaining the console.log statement
 
 // Get the element containing the thank you message
@@ -22,22 +31,31 @@ var userId = urlParams.get('userid');
 // Update result message based on survey result
 const resultMessageElement = document.getElementById('result-message');
 
-var surveyResultQuery = "SELECT Result from StudentSurvey WHERE UserId = " +  userId; 
-executeSQL(surveyResultQuery)
-    .then(
-        rows => {
-            console.log(rows);
-            const surveyResult = rows[0].result;
+async function handleSurveyResults(userId) {
+    try {
+        const surveyResultQuery = "SELECT Result from StudentSurvey WHERE UserId = " +  userId;
+        const rows = await executeSQL(surveyResultQuery);
+        console.log(rows);
+        
+        const surveyResult = rows[0].result;
 
-            if (surveyResult === 'positive') {
-              resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: red;">positive</span>. You need to take a TB test.</h2>';
-            } else if (surveyResult === 'negative') {
-              resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: green;">negative</span>. You do not need a TB test.</h2>';
-            } else {
-              resultMessageElement.innerHTML = '<h2>Your TB screening result is pending. Check your email for further instructions.</h2>';
-            }
-    })
-    .catch(error => console.error('Error:', error));
+        if (surveyResult === 'positive') {
+            resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: red;">positive</span>. You need to take a TB test.</h2>';
+            await sendEmailsResults(); // Wait for sending emails to complete
+        } else if (surveyResult === 'negative') {
+            resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: green;">negative</span>. You do not need a TB test.</h2>';
+            await sendEmailsResults(); // Wait for sending emails to complete
+        } else {
+            resultMessageElement.innerHTML = '<h2>Your TB screening result is pending. Check your email for further instructions.</h2>';
+        }
+    } catch (error) {
+        console.error('Error executing survey result query:', error);
+    }
+}
+
+// Call the async function
+handleSurveyResults(userId)
+
 
 
 
@@ -83,4 +101,3 @@ function executeSQL(query) {
           throw error; // Re-throw the error to propagate it to the caller
       });
 }
-

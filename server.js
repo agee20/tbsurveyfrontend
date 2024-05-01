@@ -1,14 +1,17 @@
 const express = require('express');
 const oracledb = require('oracledb');
 const cors = require('cors'); // Import the cors package
-const { sendEmailsOld } = require('./email.js');
 const { sendEmailsNew } = require('./email.js');
+const path = require('path'); // Import the path module
 
 const app = express();
 const PORT = 3000;
 
 // Use the cors middleware
 app.use(cors());
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname)));
 
 // Database connection configuration
 const dbConfig = {
@@ -69,11 +72,15 @@ app.get('/executeQuery', async (req, res) => {
     }
 });
 
-app.listen(PORT, async () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    try {
-        //await sendEmailsNew();
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  });
+  
+  app.listen(PORT, async () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      try {
+          await sendEmailsNew();
       } catch (error) {
-        console.error('Error calling send email function:', error);
+          console.error('Error calling send email function:', error);
       }
-});
+  });

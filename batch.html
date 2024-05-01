@@ -41,7 +41,23 @@
 
       <!-- Login Form -->
       <div class="container login-form-container">
-        <button class="btn btn-primary button-blue" onclick="sendEmailsNew()">Run batch process</button>
+        <button class="btn btn-primary button-blue">Run batch process</button>
       </div>
+
+      <!-- Script to run email.js when the button is clicked -->
+  <script>
+    // Add event listener to the button
+    document.getElementById('run-batch-process').addEventListener('click', function() {
+      // Run the email.js file
+      $.getScript('email.js')
+        .done(function(script, textStatus) {
+          console.log('Script loaded successfully');
+        })
+        .fail(function(jqxhr, settings, exception) {
+          console.error('Script load failed:', exception);
+        });
+    });
+  </script>
+  
     </body>
 </html>
