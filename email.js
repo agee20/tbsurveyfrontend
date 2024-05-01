@@ -30,11 +30,10 @@ async function sendEmailsNew() {
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
       for (const row of rows) {
-      console.log("Row:", row); // Log the current row object to inspect its properties
 
       let sendSmtpEmail = new brevo.SendSmtpEmail();
 
-      if (row.hastakensurvey === 0) {
+      if (row.hastakensurvey === 0 || row.numberofreminderssent <= 9) {
         if (row.numberofreminderssent === 0) {
           sendInitialReminderEmail(sendSmtpEmail, row);
         } else if (row.numberofreminderssent >= 1 && row.numberofreminderssent <= 8) {
@@ -56,7 +55,6 @@ async function sendEmailsNew() {
 
           // Execute the update query
           await executeSQL(updateQuery);
-
           // Call the API to send the email
           apiInstance.sendTransacEmail(sendSmtpEmail).then(function (data) {
           console.log('API called successfully. Returned data: ' + JSON.stringify(data));
@@ -73,7 +71,6 @@ async function sendEmailsNew() {
         });
 
       }
-
     }
   } catch (error) {
     console.error('Error:', error);
@@ -147,9 +144,49 @@ async function sendEmailsResults() {
   }
 }
 
+async function sendResultEmailFromServer(userId, result) {
+  console.log("GETTING TO SEND RESULT EMAIL")
+  console.log(userId);
+  console.log(result);
+
+  let sendSmtpEmail = new brevo.SendSmtpEmail();
+  const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  console.log("SEND SMPT EMAIL OBJECT VALUE: ");
+  console.log(sendSmtpEmail);
+
+  sendResultEmail(sendSmtpEmail, result);
+
+  apiInstance.sendTransacEmail(sendSmtpEmail).then(function (data) {
+    console.log('API called successfully. Returned data: ' + JSON.stringify(data));
+      //Update survey in database on success
+      const updateQuery = `
+      UPDATE studentsurvey 
+      SET 
+          lastemailsenddate = TO_TIMESTAMP('${currentDate}', 'YYYY-MM-DD HH24:MI:SS'),
+          lastemailsendstatus = 'Sent',
+          emailtype = 'Result',
+          resultssent = '1'
+      WHERE userid = ${userId}
+    `;
+      executeSQL(updateQuery);
+  }).catch(function (error) {
+    console.error('Error:', error);
+    // Update lastemailsendstatus to 'Failed' if the email sending failed
+    const updateFailedQuery = `
+      UPDATE studentsurvey 
+      SET 
+        lastemailsendstatus = 'Failed'
+      WHERE userid = ${userId}
+    `;
+    executeSQL(updateFailedQuery); // No await as we don't need to wait for this to finish
+  });
+
+
+}
+
 function sendEmail(sendSmtpEmail) {
   console.log("54");
-  console.log(sendSmtpEmail);
 }
 
 function sendInitialReminderEmail(sendSmtpEmail, row) {
@@ -173,10 +210,10 @@ function sendFinalReminderEmail(sendSmtpEmail, row) {
   sendEmail(sendSmtpEmail);
 }
 
-function sendResultEmail(sendSmtpEmail, row) {
-  sendSmtpEmail.subject = row.result === 'positive' ? "TB Testing Survey Result: Positive" : "TB Testing Survey Result: Negative";
-  sendSmtpEmail.htmlContent = generateResultContent(row);
-  setCommonEmailProperties(sendSmtpEmail, row);
+function sendResultEmail(sendSmtpEmail, result) {
+  sendSmtpEmail.subject = result === 'positive' ? "TB Testing Survey Result: Positive" : "TB Testing Survey Result: Negative";
+  sendSmtpEmail.htmlContent = generateResultContent(result);
+  setCommonEmailPropertiesResult(sendSmtpEmail);
   sendEmail(sendSmtpEmail);
 }
 
@@ -247,12 +284,32 @@ function generateFinalReminderContent(row) {
     </html>`;
 }
 
-function generateResultContent(row) {
-  if (row.result === 'positive') {
+function generateResultContent(result) {
+  if (result === 'positive') {
+    return `
+    <html>
+      <body>
+        <p>Hello,</strong></p>
+        <br/>
+        <p>Thank you for completing the online Tuberculosis (TB) screening survey. <strong>Your answers indicate a need for TB testing.</strong></p>
+        <br/>
+        <p>Please make an appointment at Student Health Services by calling 330-972-7808 or emailing <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>. Please have your TB test by (insert due date here).</p>
+        <br/>
+        <p>Student Health Services is located inside the Student Recreation and Wellness Center, Suite 260. If you do not have the university's student health insurance plan, please bring your health insurance card.</p>
+        <br/>
+        <p><strong>As a friendly reminder, this is a requirement of the university.</strong> Please be aware that failure to complete the test by the due date listed above will result in a medical hold placed on your student account. The hold prevents you from registering for classes for the next semester and may cause issues with your student visa. The hold is removed after you have completed the necessary requirements.</p>
+        <br/>
+        <p>Please let us know if you have any questions.</p>
+        <br/>
+        <p>Thank you,</p>
+        <p>The University of Akron<br/>Student Health Services</p>
+      </body>
+    </html>`;
+  } else if (result === 'negative') {
     return `
       <html>
         <body>
-          <p>Dear ${row.firstname},</p>
+          <p>Hello,</p>
           <br/>
           <p>Thank you for completing the online Tuberculosis (TB) screening survey. Based on your survey answers,
           you do not need a TB test and have completed the university's TB screening/testing requirements.</p>
@@ -264,26 +321,6 @@ function generateResultContent(row) {
           Student Health Services</p>
         </body>
       </html>`;
-  } else if (row.result === 'negative') {
-    return `
-      <html>
-        <body>
-          <p>Dear <strong>${row.firstname},</strong></p>
-          <br/>
-          <p>Thank you for completing the online Tuberculosis (TB) screening survey. <strong>Your answers indicate a need for TB testing.</strong></p>
-          <br/>
-          <p>Please make an appointment at Student Health Services by calling 330-972-7808 or emailing <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>. Please have your TB test by (insert due date here).</p>
-          <br/>
-          <p>Student Health Services is located inside the Student Recreation and Wellness Center, Suite 260. If you do not have the university's student health insurance plan, please bring your health insurance card.</p>
-          <br/>
-          <p><strong>As a friendly reminder, this is a requirement of the university.</strong> Please be aware that failure to complete the test by the due date listed above will result in a medical hold placed on your student account. The hold prevents you from registering for classes for the next semester and may cause issues with your student visa. The hold is removed after you have completed the necessary requirements.</p>
-          <br/>
-          <p>Please let us know if you have any questions.</p>
-          <br/>
-          <p>Thank you,</p>
-          <p>The University of Akron<br/>Student Health Services</p>
-        </body>
-      </html>`;
   }
 }
 
@@ -292,7 +329,12 @@ function setCommonEmailProperties(sendSmtpEmail, row) {
   sendSmtpEmail.to = [{ "email": "testtbsurvey123@gmail.com", "name": row.firstname + ' ' + row.lastname }];
 }
 
-module.exports = { sendEmailsNew, sendEmailsResults };
+function setCommonEmailPropertiesResult(sendSmtpEmail) {
+  sendSmtpEmail.sender = { "name": "Akron Health Services", "email": "testtbsurvey123@gmail.com" };
+  sendSmtpEmail.to = [{ "email": "testtbsurvey123@gmail.com"}];
+}
+
+module.exports = { sendEmailsNew, sendEmailsResults, sendResultEmailFromServer };
 
 
 /* Database Connection Utility Functions */

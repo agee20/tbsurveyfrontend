@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     //Logout button listener
     //Get the button element
     const loginButton = document.querySelector('.button-blue');
-    
+
     // Add event listener to the button
     loginButton.addEventListener('click', function() {
         // Redirect to the index page
@@ -122,6 +122,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 .then(
                     rows => {
                         console.log(rows);
+                        sendResultsEmail(userId, result)
                         window.location.href = "./results.html?" + "userid=" + userId;
                 })
                 .catch(error => console.error('Error:', error));
@@ -305,6 +306,39 @@ function getFormResponses() {
     return responses;
 }
 
+
+//Temp call for testing
+//sendResultsEmail(15, "positive");
+
+/* Send Results Email Function, calls server function */
+async function sendResultsEmail(userId, result) {
+    console.log("Send results email function called.")
+    const url = 'http://localhost:3000/send-results';
+    const requestBody = {
+        userId: userId,
+        result: result
+    };
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            const responseData = await response.json();
+            console.log(responseData); // Log the response data
+        } else {
+            console.error('Error:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
 
 
 /* Database Connection Utility Functions */

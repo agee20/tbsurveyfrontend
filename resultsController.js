@@ -1,12 +1,3 @@
-const brevo = require('@getbrevo/brevo');
-const { sendEmailsResults } = require('./email'); // Assuming you have defined sendEmailsResults function in email.js
-
-let defaultClient = brevo.ApiClient.instance;
-let apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = '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';
-
-let apiInstance = new brevo.TransactionalEmailsApi();
-
 console.log('hello'); // Retaining the console.log statement
 
 // Get the element containing the thank you message
@@ -41,10 +32,8 @@ async function handleSurveyResults(userId) {
 
         if (surveyResult === 'positive') {
             resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: red;">positive</span>. You need to take a TB test.</h2>';
-            await sendEmailsResults(); // Wait for sending emails to complete
         } else if (surveyResult === 'negative') {
             resultMessageElement.innerHTML = '<h2>Your TB screening result is <span style="color: green;">negative</span>. You do not need a TB test.</h2>';
-            await sendEmailsResults(); // Wait for sending emails to complete
         } else {
             resultMessageElement.innerHTML = '<h2>Your TB screening result is pending. Check your email for further instructions.</h2>';
         }
