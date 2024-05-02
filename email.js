@@ -116,8 +116,7 @@ async function sendEmailsResults() {
                   lastemailsenddate = TO_TIMESTAMP('${currentDate}', 'YYYY-MM-DD HH24:MI:SS'),
                   lastemailsendstatus = 'Sent',
                   emailtype = 'Result',
-                  resultssent = '1'
-              WHERE userid = ${row.userid}
+                  WHERE userid = ${row.userid}
           `;
 
           await executeSQL(updateQuery);
@@ -226,7 +225,7 @@ function generateInitialReminderContent(row) {
         <br/>
         <p>Welcome to The University of Akron! As discussed at your orientation, the university requires
         that all new students are screened for Tuberculosis (TB). Please complete the online screening
-        survey using this link: <a href="http://localhost:3000/">Survey</a>. Please complete it by (insert due date here).</p>
+        survey using this link: <a href="http://localhost:3000/">Click to Access Survey</a>. Please complete it by May 25th 2024.</p>
         <br/>
         <p>If you have any questions or concerns, please contact Student Health Services at 330-972-7808
         or <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>.</p>
@@ -247,7 +246,7 @@ function generateReminderContent(row) {
         <br/>
         <p>Our records show that you have not yet completed the Tuberculosis (TB) screening survey,
         which is a requirement of The University of Akron for all new students. Please complete the
-        survey using this link: <a href="http://localhost:3000/">Survey</a>. The due date is (insert due date here).</p>
+        survey using this link: <a href="http://localhost:3000/">Click to Access Survey</a>. The due date is May 25th 2024.</p>
         <br/>
         <p>If you have any questions or concerns, please contact Student Health Services at 330-972-7808
         or <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>.</p>
@@ -267,7 +266,7 @@ function generateFinalReminderContent(row) {
         <p>Dear ${row.firstname},</p>
         <br/>
         <p>Our records show that you have not completed the mandatory Tuberculosis (TB) screening survey. This is a
-        requirement for all new students at The University of Akron. The final deadline is (insert date here).</p>
+        requirement for all new students at The University of Akron. The final deadline is May 25th 2024.</p>
         <br/>
         <p>Failure to complete the survey by this date will result in a medical hold on your student account. The hold
         prevents you from registering for classes for the next semester and may cause issues with your student visa.
@@ -293,7 +292,7 @@ function generateResultContent(result) {
         <br/>
         <p>Thank you for completing the online Tuberculosis (TB) screening survey. <strong>Your answers indicate a need for TB testing.</strong></p>
         <br/>
-        <p>Please make an appointment at Student Health Services by calling 330-972-7808 or emailing <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>. Please have your TB test by (insert due date here).</p>
+        <p>Please make an appointment at Student Health Services by calling 330-972-7808 or emailing <a href="mailto:healthservices@uakron.edu">healthservices@uakron.edu</a>. Please have your TB test by August 1st.</p>
         <br/>
         <p>Student Health Services is located inside the Student Recreation and Wellness Center, Suite 260. If you do not have the university's student health insurance plan, please bring your health insurance card.</p>
         <br/>
